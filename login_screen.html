@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login | Subscription Tracker</title>
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0f1220;
+      color: #f2f3f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* Card Layout */
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 14px;
+      background: #141830;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .hd {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, .10);
+      background: #12162a;
+    }
+
+    .hd h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .bd {
+      padding: 24px;
+    }
+
+    /* Form Elements */
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #b9bdd0;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, .15);
+      background: #0f1327;
+      color: #f2f3f8;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: #2b67ff;
+    }
+
+    /* Buttons */
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #2b67ff;
+      background: #2b67ff;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #3a75ff;
+    }
+
+    /* Links & Subtext */
+    .footer-txt {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #b9bdd0;
+      text-align: center;
+    }
+
+    .footer-txt a {
+      color: #2b67ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer-txt a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="hd">
+      <h1>Welcome Back</h1>
+    </div>
+
+    <div class="bd">
+      <form id="loginForm" action="project%20(1).html" method="get">
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="name@company.com" required>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit">Sign In</button>
+      </form>
+
+      <div class="footer-txt">
+        Don't have an account? <a href="create_account.html">Create one</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
