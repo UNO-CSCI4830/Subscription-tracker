@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Subscription Tracker</title>
+
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f1220;color:#f2f3f8}
+    .wrap{max-width:1050px;margin:24px auto;padding:0 14px}
+    h1{margin:0;font-size:22px}
+    .subtxt{margin:6px 0 14px;color:#b9bdd0;font-size:13px}
+
+    .tabs{display:none;gap:10px;margin-bottom:12px}
+    .tab{
+      flex:1;padding:10px;border-radius:999px;border:1px solid rgba(255,255,255,.15);
+      background:transparent;color:#b9bdd0;cursor:pointer;font-weight:700
+    }
+    .tab.active{background:#2b67ff;border-color:#2b67ff;color:#fff}
+
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:14px}
+    .card{border:1px solid rgba(255,255,255,.12);border-radius:14px;background:#141830;overflow:hidden}
+    .hd{
+      padding:12px 14px;display:flex;align-items:center;justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.10);background:#12162a
+    }
+    .hd h2{margin:0;font-size:14px}
+    .bd{padding:14px}
+
+    label{display:block;font-size:12px;color:#b9bdd0;margin:0 0 6px}
+    input,select,textarea{
+      width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);
+      background:#0f1327;color:#f2f3f8;outline:none
+    }
+    textarea{min-height:70px;resize:vertical}
+
+    .row{display:flex;gap:10px}
+    .row>*{flex:1}
+
+    .btnrow{display:flex;gap:10px;margin-top:12px}
+    button{
+      padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.15);
+      background:#2b67ff;color:#fff;cursor:pointer;font-weight:700;font-size:13px
+    }
+    button.secondary{background:transparent;color:#f2f3f8}
+    button.small{padding:7px 10px;font-size:12px;background:#1a1f39}
+    button.danger{background:#ff476a;border-color:#ff476a}
+
+    .hint{margin-top:10px;font-size:12px;color:#b9bdd0;line-height:1.35}
+
+    .controls{
+      display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.10);
+      background:#12162a;flex-wrap:wrap
+    }
+    .controls input{flex:1;min-width:220px}
+
+    .summary{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;
+      border-bottom:1px solid rgba(255,255,255,.10)
+    }
+    .box{border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;background:#10142b}
+    .box .k{font-size:12px;color:#b9bdd0;margin-bottom:6px}
+    .box .v{font-size:18px;font-weight:800}
+    .box .s{font-size:12px;color:#b9bdd0;margin-top:4px}
+
+    .list{padding:12px 14px 14px}
+    .empty{
+      padding:14px;border:1px dashed rgba(255,255,255,.18);border-radius:12px;
+      color:#b9bdd0;background:#10142b
+    }
+
+    .item{
+      border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin-top:10px;
+      background:#10142b;position:relative;overflow:hidden;display:flex;justify-content:space-between;gap:10px
+    }
+    .bar{position:absolute;left:0;top:0;bottom:0;width:5px;background:#26d3b6}
+    .soon .bar{background:#ff476a}
+    .mid  .bar{background:#f5b942}
+    .good .bar{background:#26d3b6}
+
+    .left{display:flex;gap:10px;min-width:0;align-items:flex-start}
+    .logo{
+      width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+      background:#141830;display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:hidden
+    }
+    .logo img{width:18px;height:18px}
+    .name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
+    .meta{margin-top:5px;font-size:12px;color:#b9bdd0;display:flex;flex-wrap:wrap;gap:8px}
+    .tag{border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:3px 8px;background:#141830}
+    .note{margin-top:6px;font-size:12px;color:#b9bdd0;line-height:1.3;max-width:560px}
+    .right{text-align:right;flex:0 0 auto;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+    .price{font-weight:900}
+
+    @media (max-width:880px){
+      .grid{grid-template-columns:1fr}
+      .tabs{display:flex}
+      .hide{display:none}
+      .summary{grid-template-columns:1fr}
+      .name{max-width:280px}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Subscription Tracker</h1>
+    <div class="subtxt">
+      Quick UI for class: add on the left, list on the right. Mobile uses tabs so it’s not cramped.
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="add">Add</button>
+      <button class="tab" data-tab="list">List</button>
+    </div>
+
+    <div class="grid">
+      <div class="card" id="addPanel">
+        <div class="hd">
+          <h2>Add subscription</h2>
+          <button class="small" id="demoBtn" type="button">Load demo</button>
+        </div>
+
+        <div class="bd">
+          <form id="form">
+            <div class="row">
+              <div>
+                <label>Service</label>
+                <input id="nameInput" placeholder="Spotify, Canva, Xbox..." required>
+              </div>
+              <div>
+                <label>Website (logo)</label>
+                <input id="siteInput" placeholder="spotify.com">
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px">
+              <div>
+                <label>Price</label>
+                <input id="priceInput" type="number" step="0.01" min="0" placeholder="9.99" required>
+              </div>
+              <div>
+                <label>Cycle</label>
+                <select id="cycleInput">
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="weekly">Weekly</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px">
+              <div>
+                <label>Next renewal</label>
+                <input id="dateInput" type="date" required>
+              </div>
+              <div>
+                <label>Category</label>
+                <select id="catInput">
+                  <option>Streaming</option>
+                  <option>Music</option>
+                  <option>Cloud</option>
+                  <option>Gaming</option>
+                  <option>Software</option>
+                  <option>Fitness</option>
+                  <option>Utilities</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <label>Notes</label>
+              <textarea id="notesInput" placeholder="shared account, student plan, cancel after semester..."></textarea>
+            </div>
+
+            <div class="btnrow">
+              <button id="addBtn" type="submit">Add</button>
+              <button class="secondary" id="resetBtn" type="button">Clear</button>
+            </div>
+
+            <div class="hint">
+              Color is based on days left: 0–7 soon, 8–30 mid, 31+ long.
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card" id="listPanel">
+        <div class="controls">
+          <input id="searchInput" placeholder="Search...">
+          <select id="sortInput">
+            <option value="soonest">Due (soonest)</option>
+            <option value="latest">Due (latest)</option>
+            <option value="hi">Price (high)</option>
+            <option value="lo">Price (low)</option>
+            <option value="az">Name (A–Z)</option>
+            <option value="za">Name (Z–A)</option>
+          </select>
+          <select id="filterInput">
+            <option value="all">All</option>
+            <option value="soon">Due soon</option>
+            <option value="mid">Mid</option>
+            <option value="long">Long-term</option>
+          </select>
+        </div>
+
+        <div class="summary">
+          <div class="box">
+            <div class="k">Monthly total (estimated)</div>
+            <div class="v" id="monthlyTotal">$0.00</div>
+            <div class="s" id="countText">0 subscriptions</div>
+          </div>
+          <div class="box">
+            <div class="k">Next renewal</div>
+            <div class="v" id="nextWhen">—</div>
+            <div class="s" id="nextWhat">—</div>
+          </div>
+        </div>
+
+        <div class="list" id="list"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const STORAGE_KEY = "subs_tracker_simple_v1";
+  let subs = [];
+  let editId = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  const formEl = $("form");
+  const nameInput = $("nameInput");
+  const siteInput = $("siteInput");
+  const priceInput = $("priceInput");
+  const cycleInput = $("cycleInput");
+  const dateInput = $("dateInput");
+  const catInput = $("catInput");
+  const notesInput = $("notesInput");
+  const addBtn = $("addBtn");
+  const resetBtn = $("resetBtn");
+
+  const searchInput = $("searchInput");
+  const sortInput = $("sortInput");
+  const filterInput = $("filterInput");
+  const listEl = $("list");
+
+  const monthlyTotal = $("monthlyTotal");
+  const countText = $("countText");
+  const nextWhen = $("nextWhen");
+  const nextWhat = $("nextWhat");
+
+  const tabs = $("tabs");
+  const addPanel = $("addPanel");
+  const listPanel = $("listPanel");
+
+  function todayISO(){
+    return new Date().toISOString().slice(0,10);
+  }
+
+  // IMPORTANT: only set default if the input is empty (so it doesn't fight you)
+  if (!dateInput.value) dateInput.value = todayISO();
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      subs = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(subs)) subs = [];
+    } catch (e) { subs = []; }
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(subs)); } catch (e) {}
+  }
+
+  function newId() {
+    return Math.random().toString(16).slice(2) + Date.now().toString(16);
+  }
+
+  function parseDate(iso) {
+    const p = (iso || "").split("-").map(Number);
+    return new Date(p[0], (p[1] || 1) - 1, p[2] || 1);
+  }
+
+  function daysLeft(iso) {
+    const today = new Date();
+    const a = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const d = parseDate(iso);
+    const b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
+  }
+
+  function bucketColor(days) {
+    if (days <= 7) return "soon";
+    if (days <= 30) return "mid";
+    return "good";
+  }
+
+  function money(n) {
+    return Number(n || 0).toLocaleString(undefined, { style: "currency", currency: "USD" });
+  }
+
+  function pretty(d) {
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  function monthlyEstimate(price, cycle) {
+    price = Number(price || 0);
+    if (cycle === "yearly") return price / 12;
+    if (cycle === "weekly") return (price * 52) / 12;
+    return price;
+  }
+
+  function favicon(site) {
+    if (!site) return "";
+    let host = site.trim().replace(/^https?:\/\//i, "");
+    host = host.replace(/\/.*$/, "");
+    if (!host) return "";
+    return "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(host) + "&sz=64";
+  }
+
+  function updateSummary() {
+    const total = subs.reduce((sum, s) => sum + monthlyEstimate(s.price, s.cycle), 0);
+    monthlyTotal.textContent = money(total);
+    countText.textContent = subs.length + " subscription" + (subs.length === 1 ? "" : "s");
+
+    if (!subs.length) {
+      nextWhen.textContent = "—";
+      nextWhat.textContent = "—";
+      return;
+    }
+
+    const soonest = [...subs].sort((a, b) => parseDate(a.renewal) - parseDate(b.renewal))[0];
+    const d = parseDate(soonest.renewal);
+    const left = daysLeft(soonest.renewal);
+
+    nextWhen.textContent = pretty(d);
+    nextWhat.textContent = soonest.name + " • " + left + " day" + (left === 1 ? "" : "s") + " left";
+  }
+
+  function getView() {
+    const q = (searchInput.value || "").trim().toLowerCase();
+
+    let view = subs.filter(s => {
+      const hay = (s.name + " " + (s.category || "") + " " + (s.site || "")).toLowerCase();
+      if (q && !hay.includes(q)) return false;
+
+      const d = daysLeft(s.renewal);
+      const b = bucketColor(d);
+
+      if (filterInput.value === "soon" && b !== "soon") return false;
+      if (filterInput.value === "mid" && b !== "mid") return false;
+      if (filterInput.value === "long" && b !== "good") return false;
+
+      return true;
+    });
+
+    view.sort((a, b) => {
+      const aDue = parseDate(a.renewal).getTime();
+      const bDue = parseDate(b.renewal).getTime();
+
+      switch (sortInput.value) {
+        case "soonest": return aDue - bDue;
+        case "latest":  return bDue - aDue;
+        case "hi":      return Number(b.price) - Number(a.price);
+        case "lo":      return Number(a.price) - Number(b.price);
+        case "az":      return a.name.localeCompare(b.name);
+        case "za":      return b.name.localeCompare(a.name);
+      }
+      return 0;
+    });
+
+    return view;
+  }
+
+  function render() {
+    updateSummary();
+    const view = getView();
+
+    if (!view.length) {
+      listEl.innerHTML = `<div class="empty">Nothing here yet. Add one on the left (or hit demo).</div>`;
+      return;
+    }
+
+    listEl.innerHTML = "";
+
+    view.forEach(s => {
+      const left = daysLeft(s.renewal);
+      const b = bucketColor(left);
+      const d = parseDate(s.renewal);
+
+      const logo = s.site
+        ? `<img src="${favicon(s.site)}" alt="" onerror="this.style.display='none'">`
+        : "•";
+
+      const div = document.createElement("div");
+      div.className = "item " + b;
+
+      div.innerHTML = `
+        <div class="bar"></div>
+        <div class="left">
+          <div class="logo" title="${s.site || "No site"}">${logo}</div>
+          <div style="min-width:0">
+            <div class="name">${s.name}</div>
+            <div class="meta">
+              <span class="tag">${s.category || "Other"}</span>
+              <span class="tag">${s.cycle}</span>
+              <span class="tag">Due: ${pretty(d)}</span>
+              <span class="tag">${left}d</span>
+            </div>
+            ${s.notes ? `<div class="note">${s.notes}</div>` : ""}
+          </div>
+        </div>
+        <div class="right">
+          <div class="price">${money(s.price)}</div>
+          <div>
+            <button class="small" data-action="edit" data-id="${s.id}">Edit</button>
+            <button class="small danger" data-action="del" data-id="${s.id}">Delete</button>
+          </div>
+        </div>
+      `;
+
+      listEl.appendChild(div);
+    });
+  }
+
+  function setTab(which) {
+    const mobile = window.matchMedia("(max-width:880px)").matches;
+    if (!mobile) return;
+
+    tabs.querySelectorAll(".tab").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === which);
+    });
+
+    if (which === "add") {
+      addPanel.classList.remove("hide");
+      listPanel.classList.add("hide");
+    } else {
+      listPanel.classList.remove("hide");
+      addPanel.classList.add("hide");
+    }
+  }
+
+  formEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const name = nameInput.value.trim();
+    const site = siteInput.value.trim();
+    const price = priceInput.value;
+    const cycle = cycleInput.value;
+    const renewal = dateInput.value;
+    const category = catInput.value;
+    const notes = notesInput.value.trim();
+
+    if (!name || !renewal || price === "") {
+      alert("Fill out name, price, and renewal date.");
+      return;
+    }
+
+    const obj = {
+      id: editId || newId(),
+      name, site,
+      price: Number(price),
+      cycle, renewal,
+      category, notes
+    };
+
+    if (editId) {
+      const idx = subs.findIndex(x => x.id === editId);
+      if (idx !== -1) subs[idx] = obj;
+      editId = null;
+      addBtn.textContent = "Add";
+    } else {
+      subs.push(obj);
+    }
+
+    save();
+    render();
+
+    formEl.reset();
+    dateInput.value = todayISO();   // set a default AFTER reset, but you can still change it
+    setTab("list");
+  });
+
+  resetBtn.addEventListener("click", () => {
+    editId = null;
+    addBtn.textContent = "Add";
+    formEl.reset();
+    dateInput.value = todayISO();
+  });
+
+  listEl.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+
+    const hit = subs.find(x => x.id === id);
+    if (!hit) return;
+
+    if (action === "del") {
+      if (confirm("Delete " + hit.name + "?")) {
+        subs = subs.filter(x => x.id !== id);
+        save();
+        render();
+      }
+    }
+
+    if (action === "edit") {
+      editId = id;
+      nameInput.value = hit.name;
+      siteInput.value = hit.site || "";
+      priceInput.value = hit.price;
+      cycleInput.value = hit.cycle;
+      dateInput.value = hit.renewal;
+      catInput.value = hit.category || "Other";
+      notesInput.value = hit.notes || "";
+      addBtn.textContent = "Save";
+      setTab("add");
+      nameInput.focus();
+    }
+  });
+
+  [searchInput, sortInput, filterInput].forEach(el => {
+    el.addEventListener("input", render);
+    el.addEventListener("change", render);
+  });
+
+  tabs.addEventListener("click", (e) => {
+    const b = e.target.closest(".tab");
+    if (!b) return;
+    setTab(b.dataset.tab);
+  });
+
+  window.addEventListener("resize", () => {
+    const mobile = window.matchMedia("(max-width:880px)").matches;
+    if (!mobile) {
+      addPanel.classList.remove("hide");
+      listPanel.classList.remove("hide");
+    } else {
+      const active = tabs.querySelector(".tab.active")?.dataset.tab || "add";
+      setTab(active);
+    }
+  });
+
+  $("demoBtn").addEventListener("click", () => {
+    const today = new Date();
+    const plus = (n) => {
+      const d = new Date(today);
+      d.setDate(d.getDate() + n);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const da = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${da}`;
+    };
+
+    subs = [
+      { id: newId(), name:"Xbox Game Pass", site:"xbox.com", price:16.99, cycle:"monthly", renewal:plus(5),  category:"Gaming",   notes:"forget to cancel sometimes" },
+      { id: newId(), name:"Canva Pro",      site:"canva.com", price:12.99, cycle:"monthly", renewal:plus(14), category:"Software", notes:"using for class stuff" },
+      { id: newId(), name:"iCloud",         site:"icloud.com",price:2.99,  cycle:"monthly", renewal:plus(38), category:"Cloud",    notes:"phone backups" },
+      { id: newId(), name:"Amazon Prime",   site:"amazon.com",price:139.00,cycle:"yearly",  renewal:plus(9),  category:"Utilities",notes:"yearly" }
+    ];
+
+    save();
+    render();
+    setTab("list");
+  });
+
+  load();
+  render();
+  setTab("add");
+</script>
+
+</body>
+</html>
