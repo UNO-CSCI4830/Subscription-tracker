@@ -29,8 +29,16 @@
 
     label{display:block;font-size:12px;color:#b9bdd0;margin:0 0 6px}
     input,select,textarea{
-      width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);
-      background:#0f1327;color:#f2f3f8;outline:none
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: #0f1327;
+      color: #f2f3f8;
+      outline: none;
+      /* Crucial: ensures padding doesn't break the width */
+      box-sizing: border-box; 
+      font-size: 13px;
     }
     textarea{min-height:70px;resize:vertical}
 
@@ -91,21 +99,35 @@
     .right{text-align:right;flex:0 0 auto;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
     .price{font-weight:900}
 
-    @media (max-width:880px){
-      .grid{grid-template-columns:1fr}
-      .tabs{display:flex}
-      .hide{display:none}
-      .summary{grid-template-columns:1fr}
-      .name{max-width:280px}
+    .form-grid {
+      display: grid;
+      /* Fixed 2-column layout with equal width */
+      grid-template-columns: 1fr 1fr; 
+      gap: 15px 10px; /* More vertical gap for labels */
+    }
+
+    /* Ensure the label and input stay stacked correctly */
+    .form-grid > div {
+      display: flex;
+      flex-direction: column;
+      min-width: 0; /* Prevents flex children from overflowing */
+    }
+
+    /* Ensure the label and input stay stacked correctly */
+    .form-grid > div {
+      display: flex;
+      flex-direction: column;
+      min-width: 0; /* Prevents flex children from overflowing */
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <h1>Subscription Tracker</h1>
+    <img src="subtracked_logo_small.PNG" alt="Logo" style="float: left; margin-right: 10px; width: 50px; height: 50px; border-radius: 5px;">
+    <h1>SubTracked</h1>
     <div class="subtxt">
-      Quick UI for class: add on the left, list on the right. Mobile uses tabs so it’s not cramped.
+      
     </div>
 
     <div class="tabs" id="tabs">
@@ -117,12 +139,11 @@
       <div class="card" id="addPanel">
         <div class="hd">
           <h2>Add subscription</h2>
-          <button class="small" id="demoBtn" type="button">Load demo</button>
         </div>
 
         <div class="bd">
           <form id="form">
-            <div class="row">
+            <div class="form-grid">
               <div>
                 <label>Service</label>
                 <input id="nameInput" placeholder="Spotify, Canva, Xbox..." required>
@@ -131,9 +152,6 @@
                 <label>Website (logo)</label>
                 <input id="siteInput" placeholder="spotify.com">
               </div>
-            </div>
-
-            <div class="row" style="margin-top:10px">
               <div>
                 <label>Price</label>
                 <input id="priceInput" type="number" step="0.01" min="0" placeholder="9.99" required>
@@ -146,9 +164,6 @@
                   <option value="weekly">Weekly</option>
                 </select>
               </div>
-            </div>
-
-            <div class="row" style="margin-top:10px">
               <div>
                 <label>Next renewal</label>
                 <input id="dateInput" type="date" required>
@@ -542,29 +557,6 @@
       const active = tabs.querySelector(".tab.active")?.dataset.tab || "add";
       setTab(active);
     }
-  });
-
-  $("demoBtn").addEventListener("click", () => {
-    const today = new Date();
-    const plus = (n) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() + n);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const da = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${da}`;
-    };
-
-    subs = [
-      { id: newId(), name:"Xbox Game Pass", site:"xbox.com", price:16.99, cycle:"monthly", renewal:plus(5),  category:"Gaming",   notes:"forget to cancel sometimes" },
-      { id: newId(), name:"Canva Pro",      site:"canva.com", price:12.99, cycle:"monthly", renewal:plus(14), category:"Software", notes:"using for class stuff" },
-      { id: newId(), name:"iCloud",         site:"icloud.com",price:2.99,  cycle:"monthly", renewal:plus(38), category:"Cloud",    notes:"phone backups" },
-      { id: newId(), name:"Amazon Prime",   site:"amazon.com",price:139.00,cycle:"yearly",  renewal:plus(9),  category:"Utilities",notes:"yearly" }
-    ];
-
-    save();
-    render();
-    setTab("list");
   });
 
   load();
