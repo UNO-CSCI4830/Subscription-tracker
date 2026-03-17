@@ -125,25 +125,34 @@
     </div>
 
     <div class="bd">
-      <form id="loginForm" action="project%20(1).html" method="get">
+      <form id="loginForm" method="get">
         <div class="field">
           <label>Email Address</label>
-          <input type="email" name="email" placeholder="name@company.com" required>
+          <input id="loginEmail" type="email" name="email" placeholder="name@company.com" required>
         </div>
 
         <div class="field">
           <label>Password</label>
-          <input type="password" name="password" placeholder="••••••••" required>
+          <input id="loginPassword" type="password" name="password" placeholder="••••••••" required>
         </div>
 
         <button type="submit">Sign In</button>
       </form>
 
+      <div id="loginMessage" class="footer-txt"></div>
+
       <div class="footer-txt">
         Don't have an account? <a href="create_account.html">Create one</a>
       </div>
+
+      <div class="footer-txt">
+        Continue as <a href="project (1).html">Guest</a>
+      </div>
     </div>
   </div>
+
+  <script src = "auth.js">
+  </script>
 
 </body>
 </html>

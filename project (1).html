@@ -119,15 +119,35 @@
       flex-direction: column;
       min-width: 0; /* Prevents flex children from overflowing */
     }
+
+    /*rearranged the topbar and added the user login/logout section */
+    .topbar{display: flex; justify-content: space-between; align-items: center;}
+    .brand_area{display: flex; flex-direction: column;}
+    .brand_row{display: flex; align-items: center; gap: 10px;}
+    .brand_row h1{margin: 0; position: relative; top: 1px; font-size: 28px; left: 10px;}
+    .main_logo{width: 42px; height: 42px; object-fit: cover; border-radius: 8px; display: block; flex-shrink: 0;}
+    .user_area{display: flex; align-items: center; gap: 10px; margin-left: auto;}
+    .current_user_text{color: #ece8e9; font-size: 13px; white-space: nowrap;}
+
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <img src="subtracked_logo_small.PNG" alt="Logo" style="float: left; margin-right: 10px; width: 50px; height: 50px; border-radius: 5px;">
-    <h1>SubTracked</h1>
-    <div class="subtxt">
-      
+    <div class="topbar">
+      <div class="brand_area">
+        <div class="brand_row">
+          <img src="subtracked_logo_small.PNG" alt="Logo" class="main_logo">
+          <h1>SubTracked</h1>
+        </div>
+        <div class="subtxt"></div>
+      </div>
+
+      <div class="user_area">
+        <span id="currentUserText" class="current_user_text"></span>
+        <button id="logoutBtn" class="small" type="button">Logout</button>
+        <button id="loginBtn" class="small" type="button">Login</button>
+      </div>
     </div>
 
     <div class="tabs" id="tabs">
@@ -563,6 +583,8 @@
   render();
   setTab("add");
 </script>
+
+<script src="auth.js"></script>
 
 </body>
 </html>

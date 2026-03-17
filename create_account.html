@@ -122,43 +122,46 @@
         <div class="row">
           <div class="field">
             <label>First Name</label>
-            <input type="text" placeholder="Jane" required>
+            <input id="firstName" type="text" placeholder="Jane" required>
           </div>
           <div class="field">
             <label>Last Name</label>
-            <input type="text" placeholder="Doe" required>
+            <input id="lastName" type="text" placeholder="Doe" required>
           </div>
         </div>
 
         <div class="field">
           <label>Email Address</label>
-          <input type="email" placeholder="jane@example.com" required>
+          <input id="signupEmail" type="email" placeholder="jane@example.com" required>
         </div>
 
         <div class="field">
           <label>Password</label>
-          <input type="password" placeholder="At least 8 characters" minlength="8" required>
+          <input id="signupPassword" type="password" placeholder="At least 8 characters" minlength="8" required>
         </div>
 
         <label class="terms">
-          <input type="checkbox" required>
+          <input id="terms" type="checkbox" required>
           <span>I agree to the Terms of Service and Privacy Policy.</span>
         </label>
 
         <button type="submit">Create Account</button>
       </form>
 
+      <div id="signupMessage" class="footer-txt"></div>
+
       <div class="footer-txt">
         Already have an account? <a href="login_screen.html">Sign In</a>
       </div>
+
+      <div class="footer-txt">
+        Continue as <a href="project (1).html">Guest</a>
+      </div>
+
     </div>
   </div>
 
-  <script>
-    document.getElementById('signupForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert('In a real app, we would send this data to your database!');
-    });
+  <script src = "auth.js">
   </script>
 
 </body>
