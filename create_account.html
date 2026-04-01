@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Create Account | SubTracked</title>
+  <link rel="icon" type="image/x-icon" href="subtracked_logo_small.PNG">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0f1220;
+      color: #f2f3f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 14px;
+      background: #141830;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .hd {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, .10);
+      background: #12162a;
+    }
+
+    .hd h1 { margin: 0; font-size: 20px; font-weight: 800; }
+    .hd p { margin: 5px 0 0; font-size: 13px; color: #b9bdd0; }
+
+    .bd { padding: 24px; }
+
+    .field { margin-bottom: 16px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #b9bdd0;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, .15);
+      background: #0f1327;
+      color: #f2f3f8;
+      outline: none;
+    }
+
+    input:focus { border-color: #2b67ff; }
+
+    .row { display: flex; gap: 12px; }
+    .row > div { flex: 1; }
+
+    /* Custom Checkbox */
+    .terms {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #b9bdd0;
+      cursor: pointer;
+      margin: 20px 0;
+    }
+
+    .terms input { margin-top: 3px; cursor: pointer; }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #2b67ff;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    button:hover { background: #3a75ff; }
+
+    .footer-txt {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #b9bdd0;
+      text-align: center;
+    }
+
+    .footer-txt a { color: #2b67ff; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+    <img src="subtracked_logo.PNG" alt="Logo" style="width: 250px; height: auto; border-radius: 10px;">
+  </div>
+
+  <div class="card">
+    <div class="hd">
+      <h1>Join SubTracked</h1>
+      <p>Your Expenses: Tracked.</p>
+    </div>
+
+    <div class="bd">
+      <form id="signupForm">
+        <div class="row">
+          <div class="field">
+            <label>First Name</label>
+            <input type="text" placeholder="Jane" required>
+          </div>
+          <div class="field">
+            <label>Last Name</label>
+            <input type="text" placeholder="Doe" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" placeholder="jane@example.com" required>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <input type="password" placeholder="At least 8 characters" minlength="8" required>
+        </div>
+
+        <label class="terms">
+          <input type="checkbox" required>
+          <span>I agree to the Terms of Service and Privacy Policy.</span>
+        </label>
+
+        <button type="submit">Create Account</button>
+      </form>
+
+      <div class="footer-txt">
+        Already have an account? <a href="login_screen.html">Sign In</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('In a real app, we would send this data to your database!');
+    });
+  </script>
+
+</body>
+</html>
