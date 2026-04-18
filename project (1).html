@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Home | SubTracked</title>
   <link rel="icon" type="image/x-icon" href="subtracked_logo_small.PNG">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f1220;color:#f2f3f8}
@@ -119,16 +120,35 @@
       flex-direction: column;
       min-width: 0; /* Prevents flex children from overflowing */
     }
+
+    /*rearranged the topbar and added the user login/logout section */
+    .topbar{display: flex; justify-content: space-between; align-items: center;}
+    .brand_area{display: flex; flex-direction: column;}
+    .brand_row{display: flex; align-items: center; gap: 10px;}
+    .brand_row h1{margin: 0; position: relative; top: 1px; font-size: 28px; left: 10px;}
+    .main_logo{width: 42px; height: 42px; object-fit: cover; border-radius: 8px; display: block; flex-shrink: 0;}
+    .user_area{display: flex; align-items: center; gap: 10px; margin-left: auto;}
+    .current_user_text{color: #ece8e9; font-size: 13px; white-space: nowrap;}
+
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <img src="subtracked_logo_small.PNG" alt="Logo" style="float: left; margin-right: 10px; width: 50px; height: 50px; border-radius: 5px;">
-    <h1 style="display:inline-block; margin-right: 10px;">SubTracked</h1>
-    <button id="logoutBtn" class="small" style="vertical-align: middle;">Log Out</button>
-    <div class="subtxt">
-      
+    <div class="topbar">
+      <div class="brand_area">
+        <div class="brand_row">
+          <img src="subtracked_logo_small.PNG" alt="Logo" class="main_logo">
+          <h1>SubTracked</h1>
+        </div>
+        <div class="subtxt"></div>
+      </div>
+
+      <div class="user_area">
+        <span id="currentUserText" class="current_user_text"></span>
+        <button id="logoutBtn" class="small" type="button">Logout</button>
+        <button id="loginBtn" class="small" type="button">Login</button>
+      </div>
     </div>
 
     <div class="tabs" id="tabs">
@@ -242,7 +262,8 @@
   const _supabaseUrl = 'https://lnvmocbxmdfkaxrxmpqn.supabase.co';
   const _supabaseKey = 'sb_publishable_gVZEpmVuhZBt-V8NSaibYw_zaQPsmOb';
   const supabaseClient = supabase.createClient(_supabaseUrl, _supabaseKey);
-
+  const GUEST_STORAGE_KEY = "subtracked_guest_subscriptions";
+  
   let subs = [];
   let editId = null;
   let currentUser = null;
@@ -252,24 +273,28 @@
   // UI Elements
   const formEl = $("form"), nameInput = $("nameInput"), siteInput = $("siteInput");
   const priceInput = $("priceInput"), cycleInput = $("cycleInput"), dateInput = $("dateInput");
-  const catInput = $("catInput"), notesInput = $("notesInput"), addBtn = $("addBtn");
+  const catInput = $("catInput"), notesInput = $("notesInput"), addBtn = $("addBtn"), resetBtn = $("resetBtn");
   const searchInput = $("searchInput"), sortInput = $("sortInput"), filterInput = $("filterInput");
   const listEl = $("list"), monthlyTotal = $("monthlyTotal"), countText = $("countText");
-  const nextWhen = $("nextWhen"), nextWhat = $("nextWhat"), logoutBtn = $("logoutBtn");
+  const nextWhen = $("nextWhen"), nextWhat = $("nextWhat");
+  const logoutBtn = $("logoutBtn"), loginBtn = $("loginBtn"), currentUserText = $("currentUserText");
   const tabs = $("tabs"), addPanel = $("addPanel"), listPanel = $("listPanel");
 
   // --- AUTH & LOADING ---
 
+  // check if user logged in, and decide where to load data from. 
   async function checkUser() {
     const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) {
-      window.location.href = "login_screen.html";
+    currentUser = user || null;
+    refreshTopbar(currentUser);
+
+    if (currentUser) {
+      await fetchSubs();
     } else {
-      currentUser = user;
-      fetchSubs(); 
+      loadGuestSubs();
     }
   }
-
+  // If user logged in -- load data from supabase
   async function fetchSubs() {
     const { data, error } = await supabaseClient
       .from('subscriptions')
@@ -284,7 +309,30 @@
     }
   }
 
+  // Load guest data from local storage. 
+  function loadGuestSubs() {
+  try {
+    subs = JSON.parse(localStorage.getItem(GUEST_STORAGE_KEY) || "[]");
+  } catch {
+    subs = [];
+  }
+  render();
+  }
+
+function saveGuestSubs() {
+  localStorage.setItem(GUEST_STORAGE_KEY, JSON.stringify(subs));
+}
+
+function makeGuestId() {
+  return Date.now().toString() + Math.random().toString(16).slice(2);
+}
+
   // --- LOGIC HELPERS ---
+
+  function todayISO() {
+    return new Date().toISOString().slice(0, 10);
+  }
+  if (!dateInput.value) dateInput.value = todayISO();
 
   function parseDate(iso) {
     const p = (iso || "").split("-").map(Number);
@@ -335,78 +383,230 @@
     nextWhat.textContent = soonest.name + " • " + left + " days left";
   }
 
-  function render() {
-    updateSummary();
+  function getView() {
+    const q = (searchInput.value || "").trim().toLowerCase();
+
     let view = subs.filter(s => {
-      const q = (searchInput.value || "").toLowerCase();
-      if (q && !s.name.toLowerCase().includes(q)) return false;
+      const hay = (s.name + " " + (s.category || "") + " " + (s.site || "")).toLowerCase();
+      if (q && !hay.includes(q)) return false;
+
+      const d = daysLeft(s.renewal);
+      const b = bucketColor(d);
+
+      if (filterInput.value === "soon" && b !== "soon") return false;
+      if (filterInput.value === "mid" && b !== "mid") return false;
+      if (filterInput.value === "long" && b !== "good") return false;
+
       return true;
     });
 
-    listEl.innerHTML = view.length ? "" : `<div class="empty">No subscriptions found.</div>`;
-    
+    view.sort((a, b) => {
+      const aDue = parseDate(a.renewal).getTime();
+      const bDue = parseDate(b.renewal).getTime();
+
+      switch (sortInput.value) {
+        case "soonest": return aDue - bDue;
+        case "latest":  return bDue - aDue;
+        case "hi":      return Number(b.price) - Number(a.price);
+        case "lo":      return Number(a.price) - Number(b.price);
+        case "az":      return a.name.localeCompare(b.name);
+        case "za":      return b.name.localeCompare(a.name);
+      }
+      return 0;
+    });
+
+  return view;
+}
+
+  function render() {
+    updateSummary();
+    const view = getView();
+
+    if (!view.length) {
+      listEl.innerHTML = `<div class="empty">Nothing here yet. Add one on the left.</div>`;
+      return;
+    }
+
+    listEl.innerHTML = "";
+
     view.forEach(s => {
-      const left = daysLeft(s.renewal), b = bucketColor(left), d = parseDate(s.renewal);
+      const left = daysLeft(s.renewal);
+      const b = bucketColor(left);
+      const d = parseDate(s.renewal);
+
+      const logo = s.site
+        ? `<img src="${favicon(s.site)}" alt="" onerror="this.style.display='none'">`
+        : "•";
+
       const div = document.createElement("div");
       div.className = "item " + b;
+
       div.innerHTML = `
         <div class="bar"></div>
         <div class="left">
-          <div class="logo"><img src="${favicon(s.site)}" onerror="this.style.display='none'"></div>
-          <div>
+          <div class="logo" title="${s.site || "No site"}">${logo}</div>
+          <div style="min-width:0">
             <div class="name">${s.name}</div>
             <div class="meta">
-              <span class="tag">${s.category}</span><span class="tag">Due: ${pretty(d)}</span>
+              <span class="tag">${s.category || "Other"}</span>
+              <span class="tag">${s.cycle}</span>
+              <span class="tag">Due: ${pretty(d)}</span>
+              <span class="tag">${left}d</span>
             </div>
+            ${s.notes ? `<div class="note">${s.notes}</div>` : ""}
           </div>
         </div>
         <div class="right">
           <div class="price">${money(s.price)}</div>
-          <button class="small" data-action="edit" data-id="${s.id}">Edit</button>
-          <button class="small danger" data-action="del" data-id="${s.id}">Delete</button>
-        </div>`;
+          <div>
+            <button class="small" data-action="edit" data-id="${s.id}">Edit</button>
+            <button class="small danger" data-action="del" data-id="${s.id}">Delete</button>
+          </div>
+        </div>
+      `;
+
       listEl.appendChild(div);
     });
-  }
+}
 
   // --- EVENT LISTENERS ---
 
   formEl.addEventListener("submit", async (e) => {
     e.preventDefault();
+
     const obj = {
-      name: nameInput.value, site: siteInput.value, price: Number(priceInput.value),
-      cycle: cycleInput.value, renewal: dateInput.value, category: catInput.value,
-      notes: notesInput.value, user_id: currentUser.id
+      name: nameInput.value,
+      site: siteInput.value,
+      price: Number(priceInput.value),
+      cycle: cycleInput.value,
+      renewal: dateInput.value,
+      category: catInput.value,
+      notes: notesInput.value
     };
 
-    if (editId) {
-      await supabaseClient.from('subscriptions').update(obj).eq('id', editId);
-      editId = null; addBtn.textContent = "Add";
-    } else {
-      await supabaseClient.from('subscriptions').insert([obj]);
+    if (currentUser) {
+      obj.user_id = currentUser.id;
+
+      let error = null;
+
+      if (editId) {
+        const result = await supabaseClient
+          .from('subscriptions')
+          .update(obj)
+          .eq('id', editId);
+
+        error = result.error;
+        editId = null;
+        addBtn.textContent = "Add";
+  } else {
+    const result = await supabaseClient
+      .from('subscriptions')
+      .insert([obj]);
+
+    error = result.error;
+  }
+
+  if (error) {
+    console.error("Supabase error:", error);
+    alert(error.message);
+    return;
+  }
+
+  await fetchSubs();
+} else {
+      if (editId) {
+        subs = subs.map(s => s.id == editId ? { ...s, ...obj, id: editId } : s);
+        editId = null;
+        addBtn.textContent = "Add";
+      } else {
+        subs.push({ ...obj, id: makeGuestId() });
+      }
+
+      saveGuestSubs();
+      render();
     }
-    fetchSubs();
+
     formEl.reset();
+    dateInput.value = todayISO();
   });
 
   listEl.addEventListener("click", async (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
-    const id = btn.dataset.id, action = btn.dataset.action;
+
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+
     if (action === "del" && confirm("Delete?")) {
-      await supabaseClient.from('subscriptions').delete().eq('id', id);
-      fetchSubs();
+      if (currentUser) {
+        await supabaseClient.from('subscriptions').delete().eq('id', id);
+        await fetchSubs();
+      } else {
+        subs = subs.filter(x => x.id != id);
+        saveGuestSubs();
+        render();
+      }
     } else if (action === "edit") {
       const hit = subs.find(x => x.id == id);
-      editId = id; nameInput.value = hit.name; priceInput.value = hit.price;
+      if (!hit) return;
+
+      editId = id;
+      nameInput.value = hit.name || "";
+      siteInput.value = hit.site || "";
+      priceInput.value = hit.price ?? "";
+      cycleInput.value = hit.cycle || "monthly";
+      dateInput.value = hit.renewal || "";
+      catInput.value = hit.category || "Other";
+      notesInput.value = hit.notes || "";
       addBtn.textContent = "Save";
     }
   });
 
+  resetBtn.addEventListener("click", () => {
+    editId = null;
+    addBtn.textContent = "Add";
+    formEl.reset();
+    dateInput.value = todayISO();
+  });
+
+  [searchInput, sortInput, filterInput].forEach(el => {
+  el.addEventListener("input", render);
+  el.addEventListener("change", render);
+  });
+
   logoutBtn.addEventListener("click", async () => {
     await supabaseClient.auth.signOut();
+
+    currentUser = null;
+    editId = null;
+
+    formEl.reset();
+    addBtn.textContent = "Add";
+
+    refreshTopbar(null);
+    loadGuestSubs();
+  });
+
+  loginBtn.addEventListener("click", () => {
     window.location.href = "login_screen.html";
   });
+
+  function refreshTopbar(user) {
+  if (user) {
+    const displayName =
+      user.user_metadata?.first_name && user.user_metadata?.last_name
+        ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+        : (user.email || "User");
+
+    currentUserText.textContent = displayName;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+  } else {
+    currentUserText.textContent = "Guest mode";
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+  }
+}
 
   checkUser(); // Kick off the process
 </script>
