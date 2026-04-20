@@ -1,0 +1,125 @@
+
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f1220;color:#f2f3f8}
+.wrap{max-width:1050px;margin:24px auto;padding:0 14px}
+h1{margin:0;font-size:22px}
+.subtxt{margin:6px 0 14px;color:#b9bdd0;font-size:13px}
+
+.tabs{display:none;gap:10px;margin-bottom:12px}
+.tab{
+  flex:1;padding:10px;border-radius:999px;border:1px solid rgba(255,255,255,.15);
+  background:transparent;color:#b9bdd0;cursor:pointer;font-weight:700
+}
+.tab.active{background:#2b67ff;border-color:#2b67ff;color:#fff}
+
+.grid{display:grid;grid-template-columns:360px 1fr;gap:14px}
+.card{border:1px solid rgba(255,255,255,.12);border-radius:14px;background:#141830;overflow:hidden}
+.hd{
+  padding:12px 14px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,.10);background:#12162a
+}
+.hd h2{margin:0;font-size:14px}
+.bd{padding:14px}
+
+label{display:block;font-size:12px;color:#b9bdd0;margin:0 0 6px}
+input,select,textarea{
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: #0f1327;
+  color: #f2f3f8;
+  outline: none;
+  box-sizing: border-box; 
+  font-size: 13px;
+}
+textarea{min-height:70px;resize:vertical}
+
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+
+.btnrow{display:flex;gap:10px;margin-top:12px}
+button{
+  padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.15);
+  background:#2b67ff;color:#fff;cursor:pointer;font-weight:700;font-size:13px
+}
+button.secondary{background:transparent;color:#f2f3f8}
+button.small{padding:7px 10px;font-size:12px;background:#1a1f39}
+button.danger{background:#ff476a;border-color:#ff476a}
+
+.hint{margin-top:10px;font-size:12px;color:#b9bdd0;line-height:1.35}
+
+.controls{
+  display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.10);
+  background:#12162a;flex-wrap:wrap
+}
+.controls input{flex:1;min-width:220px}
+
+.summary{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;
+  border-bottom:1px solid rgba(255,255,255,.10)
+}
+.box{border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;background:#10142b}
+.box .k{font-size:12px;color:#b9bdd0;margin-bottom:6px}
+.box .v{font-size:18px;font-weight:800}
+.box .s{font-size:12px;color:#b9bdd0;margin-top:4px}
+
+.list{padding:12px 14px 14px}
+.empty{
+  padding:14px;border:1px dashed rgba(255,255,255,.18);border-radius:12px;
+  color:#b9bdd0;background:#10142b
+}
+
+.item{
+  border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin-top:10px;
+  background:#10142b;position:relative;overflow:hidden;display:flex;justify-content:space-between;gap:10px
+}
+.bar{position:absolute;left:0;top:0;bottom:0;width:5px;background:#26d3b6}
+.soon .bar{background:#ff476a}
+.mid  .bar{background:#f5b942}
+.good .bar{background:#26d3b6}
+
+.left{display:flex;gap:10px;min-width:0;align-items:flex-start}
+.logo{
+  width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:#141830;display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:hidden
+}
+.logo img{width:18px;height:18px}
+.name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
+.meta{margin-top:5px;font-size:12px;color:#b9bdd0;display:flex;flex-wrap:wrap;gap:8px}
+.tag{border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:3px 8px;background:#141830}
+.note{margin-top:6px;font-size:12px;color:#b9bdd0;line-height:1.3;max-width:560px}
+.right{text-align:right;flex:0 0 auto;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.price{font-weight:900}
+
+.form-grid {
+  display: grid;
+  /* Fixed 2-column layout with equal width */
+  grid-template-columns: 1fr 1fr; 
+  gap: 15px 10px; /* More vertical gap for labels */
+}
+
+/* Ensure the label and input stay stacked correctly */
+.form-grid > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevents flex children from overflowing */
+}
+
+/* Ensure the label and input stay stacked correctly */
+.form-grid > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevents flex children from overflowing */
+}
+
+/*rearranged the topbar and added the user login/logout section */
+.topbar{display: flex; justify-content: space-between; align-items: center;}
+.brand_area{display: flex; flex-direction: column;}
+.brand_row{display: flex; align-items: center; gap: 10px;}
+.brand_row h1{margin: 0; position: relative; top: 1px; font-size: 28px; left: 10px;}
+.main_logo{width: 42px; height: 42px; object-fit: cover; border-radius: 8px; display: block; flex-shrink: 0;}
+.user_area{display: flex; align-items: center; gap: 10px; margin-left: auto;}
+.current_user_text{color: #ece8e9; font-size: 13px; white-space: nowrap;}
+
+.iconBtn{background: none; border: none; margin-left: -12px; margin-right: -8px; font-size: 16px;}
+.iconBtn:hover{transform: rotate(30deg);}
