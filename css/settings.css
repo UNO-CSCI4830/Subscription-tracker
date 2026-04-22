@@ -105,10 +105,13 @@ button:hover {
 }
 
 .footer-txt {
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 15px;
   font-size: 13px;
   color: #b9bdd0;
   text-align: center;
+  gap: 10px;
 }
 
 .footer-txt a {

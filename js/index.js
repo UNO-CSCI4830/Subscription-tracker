@@ -66,146 +66,146 @@ function makeGuestId() {
   return Date.now().toString() + Math.random().toString(16).slice(2);
 }
 
-  // --- LOGIC HELPERS ---
+// --- LOGIC HELPERS ---
 
-  function todayISO() {
-    return new Date().toISOString().slice(0, 10);
-  }
-  if (!dateInput.value) dateInput.value = todayISO();
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+if (!dateInput.value) dateInput.value = todayISO();
 
-  function parseDate(iso) {
-    const p = (iso || "").split("-").map(Number);
-    return new Date(p[0], (p[1] || 1) - 1, p[2] || 1);
-  }
-
-  function daysLeft(iso) {
-    const today = new Date();
-    const a = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const d = parseDate(iso);
-    const b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
-  }
-
-  function bucketColor(days) {
-    if (days <= 7) return "soon";
-    if (days <= 30) return "mid";
-    return "good";
-  }
-
-  function money(n) { return Number(n || 0).toLocaleString(undefined, { style: "currency", currency: "USD" }); }
-  function pretty(d) { return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); }
-
-  function monthlyEstimate(price, cycle) {
-    price = Number(price || 0);
-    if (cycle === "yearly") return price / 12;
-    if (cycle === "weekly") return (price * 52) / 12;
-    return price;
-  }
-
-  function favicon(site) {
-    if (!site) return "";
-    let host = site.trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "");
-    return "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(host) + "&sz=64";
-  }
-
-  // --- UI RENDERING ---
-
-  function updateSummary() {
-    const total = subs.reduce((sum, s) => sum + monthlyEstimate(s.price, s.cycle), 0);
-    monthlyTotal.textContent = money(total);
-    countText.textContent = subs.length + " subscription" + (subs.length === 1 ? "" : "s");
-    if (!subs.length) { nextWhen.textContent = "—"; nextWhat.textContent = "—"; return; }
-    const soonest = [...subs].sort((a, b) => parseDate(a.renewal) - parseDate(b.renewal))[0];
-    const d = parseDate(soonest.renewal);
-    const left = daysLeft(soonest.renewal);
-    nextWhen.textContent = pretty(d);
-    nextWhat.textContent = soonest.name + " • " + left + " days left";
-  }
-
-  function getView() {
-    const q = (searchInput.value || "").trim().toLowerCase();
-
-    let view = subs.filter(s => {
-      const hay = (s.name + " " + (s.category || "") + " " + (s.site || "")).toLowerCase();
-      if (q && !hay.includes(q)) return false;
-
-      const d = daysLeft(s.renewal);
-      const b = bucketColor(d);
-
-      if (filterInput.value === "soon" && b !== "soon") return false;
-      if (filterInput.value === "mid" && b !== "mid") return false;
-      if (filterInput.value === "long" && b !== "good") return false;
-
-      return true;
-    });
-
-    view.sort((a, b) => {
-      const aDue = parseDate(a.renewal).getTime();
-      const bDue = parseDate(b.renewal).getTime();
-
-      switch (sortInput.value) {
-        case "soonest": return aDue - bDue;
-        case "latest":  return bDue - aDue;
-        case "hi":      return Number(b.price) - Number(a.price);
-        case "lo":      return Number(a.price) - Number(b.price);
-        case "az":      return a.name.localeCompare(b.name);
-        case "za":      return b.name.localeCompare(a.name);
-      }
-      return 0;
-    });
-
-  return view;
+function parseDate(iso) {
+  const p = (iso || "").split("-").map(Number);
+  return new Date(p[0], (p[1] || 1) - 1, p[2] || 1);
 }
 
-  function render() {
-    updateSummary();
-    const view = getView();
+function daysLeft(iso) {
+  const today = new Date();
+  const a = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const d = parseDate(iso);
+  const b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
+}
 
-    if (!view.length) {
-      listEl.innerHTML = `<div class="empty">Nothing here yet. Add one on the left.</div>`;
-      return;
+function bucketColor(days) {
+  if (days <= 7) return "soon";
+  if (days <= 30) return "mid";
+  return "good";
+}
+
+function money(n) { return Number(n || 0).toLocaleString(undefined, { style: "currency", currency: "USD" }); }
+function pretty(d) { return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); }
+
+function monthlyEstimate(price, cycle) {
+  price = Number(price || 0);
+  if (cycle === "yearly") return price / 12;
+  if (cycle === "weekly") return (price * 52) / 12;
+  return price;
+}
+
+function favicon(site) {
+  if (!site) return "";
+  let host = site.trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "");
+  return "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(host) + "&sz=64";
+}
+
+// --- UI RENDERING ---
+
+function updateSummary() {
+  const total = subs.reduce((sum, s) => sum + monthlyEstimate(s.price, s.cycle), 0);
+  monthlyTotal.textContent = money(total);
+  countText.textContent = subs.length + " subscription" + (subs.length === 1 ? "" : "s");
+  if (!subs.length) { nextWhen.textContent = "—"; nextWhat.textContent = "—"; return; }
+  const soonest = [...subs].sort((a, b) => parseDate(a.renewal) - parseDate(b.renewal))[0];
+  const d = parseDate(soonest.renewal);
+  const left = daysLeft(soonest.renewal);
+  nextWhen.textContent = pretty(d);
+  nextWhat.textContent = soonest.name + " • " + left + " days left";
+}
+
+function getView() {
+  const q = (searchInput.value || "").trim().toLowerCase();
+
+  let view = subs.filter(s => {
+    const hay = (s.name + " " + (s.category || "") + " " + (s.site || "")).toLowerCase();
+    if (q && !hay.includes(q)) return false;
+
+    const d = daysLeft(s.renewal);
+    const b = bucketColor(d);
+
+    if (filterInput.value === "soon" && b !== "soon") return false;
+    if (filterInput.value === "mid" && b !== "mid") return false;
+    if (filterInput.value === "long" && b !== "good") return false;
+
+    return true;
+  });
+
+  view.sort((a, b) => {
+    const aDue = parseDate(a.renewal).getTime();
+    const bDue = parseDate(b.renewal).getTime();
+
+    switch (sortInput.value) {
+      case "soonest": return aDue - bDue;
+      case "latest":  return bDue - aDue;
+      case "hi":      return Number(b.price) - Number(a.price);
+      case "lo":      return Number(a.price) - Number(b.price);
+      case "az":      return a.name.localeCompare(b.name);
+      case "za":      return b.name.localeCompare(a.name);
     }
+    return 0;
+  });
 
-    listEl.innerHTML = "";
+return view;
+}
 
-    view.forEach(s => {
-      const left = daysLeft(s.renewal);
-      const b = bucketColor(left);
-      const d = parseDate(s.renewal);
+function render() {
+  updateSummary();
+  const view = getView();
 
-      const logo = s.site
-        ? `<img src="${favicon(s.site)}" alt="" onerror="this.style.display='none'">`
-        : "•";
+  if (!view.length) {
+    listEl.innerHTML = `<div class="empty">Nothing here yet. Add one on the left.</div>`;
+    return;
+  }
 
-      const div = document.createElement("div");
-      div.className = "item " + b;
+  listEl.innerHTML = "";
 
-      div.innerHTML = `
-        <div class="bar"></div>
-        <div class="left">
-          <div class="logo" title="${s.site || "No site"}">${logo}</div>
-          <div style="min-width:0">
-            <div class="name">${s.name}</div>
-            <div class="meta">
-              <span class="tag">${s.category || "Other"}</span>
-              <span class="tag">${s.cycle}</span>
-              <span class="tag">Due: ${pretty(d)}</span>
-              <span class="tag">${left}d</span>
-            </div>
-            ${s.notes ? `<div class="note">${s.notes}</div>` : ""}
+  view.forEach(s => {
+    const left = daysLeft(s.renewal);
+    const b = bucketColor(left);
+    const d = parseDate(s.renewal);
+
+    const logo = s.site
+      ? `<img src="${favicon(s.site)}" alt="" onerror="this.style.display='none'">`
+      : "•";
+
+    const div = document.createElement("div");
+    div.className = "item " + b;
+
+    div.innerHTML = `
+      <div class="bar"></div>
+      <div class="left">
+        <div class="logo" title="${s.site || "No site"}">${logo}</div>
+        <div style="min-width:0">
+          <div class="name">${s.name}</div>
+          <div class="meta">
+            <span class="tag">${s.category || "Other"}</span>
+            <span class="tag">${s.cycle}</span>
+            <span class="tag">Due: ${pretty(d)}</span>
+            <span class="tag">${left}d</span>
           </div>
+          ${s.notes ? `<div class="note">${s.notes}</div>` : ""}
         </div>
-        <div class="right">
-          <div class="price">${money(s.price)}</div>
-          <div>
-            <button class="small" data-action="edit" data-id="${s.id}">Edit</button>
-            <button class="small danger" data-action="del" data-id="${s.id}">Delete</button>
-          </div>
+      </div>
+      <div class="right">
+        <div class="price">${money(s.price)}</div>
+        <div>
+          <button class="small" data-action="edit" data-id="${s.id}">Edit</button>
+          <button class="small danger" data-action="del" data-id="${s.id}">Delete</button>
         </div>
-      `;
+      </div>
+    `;
 
-      listEl.appendChild(div);
-    });
+    listEl.appendChild(div);
+  });
 }
 
   // --- EVENT LISTENERS ---
@@ -334,25 +334,25 @@ function makeGuestId() {
   window.location.href = "settings.html";
   });
 
-  function refreshTopbar(user) {
-  if (user) {
-    const displayName =
-      user.user_metadata?.first_name && user.user_metadata?.last_name
-        ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
-        : (user.email || "User");
+function refreshTopbar(user) {
+if (user) {
+  const displayName =
+    user.user_metadata?.first_name && user.user_metadata?.last_name
+      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+      : (user.email || "User");
 
-    currentUserText.textContent = displayName;
-    loginBtn.style.display = "none";
-    logoutBtn.style.display = "inline-block";
-    //added 'settings' (no setting UI display in guest mode)
-    if (settingBtn) settingBtn.style.display = "inline-block";
+  currentUserText.textContent = displayName;
+  loginBtn.style.display = "none";
+  logoutBtn.style.display = "inline-block";
+  //added 'settings' (no setting UI display in guest mode)
+  if (settingBtn) settingBtn.style.display = "inline-block";
 
-  } else {
-    currentUserText.textContent = "Guest mode";
-    loginBtn.style.display = "inline-block";
-    logoutBtn.style.display = "none";
-    if (settingBtn) settingBtn.style.display = "none";
-  }
+} else {
+  currentUserText.textContent = "Guest mode";
+  loginBtn.style.display = "inline-block";
+  logoutBtn.style.display = "none";
+  if (settingBtn) settingBtn.style.display = "none";
+}
 }
 
-  checkUser(); // Kick off the process
+checkUser(); // Kick off the process
