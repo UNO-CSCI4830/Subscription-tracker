@@ -57,4 +57,4 @@ Comprehensive project documentation is maintained in the [GitHub Wiki](https://g
 
 ## License & Course Information
 Developed for **CSCI 4830: Intro to Software Engineering** at the University of Nebraska Omaha. 
-Instructor: [Jaydeb Sarker]
+Instructor: Jaydeb Sarker
