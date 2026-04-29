@@ -1,7 +1,7 @@
 # SubTracked
 **Centralized Subscription Management for the Modern User**
 
-SubTracked is a secure web application built for the CSCI 4830 Intro to Software Engineering. It allows users to track recurring expenses, visualize monthly spending, and manage subscription cycles in one centralized dashboard.
+SubTracked is a secure web application built for CSCI 4830: Intro to Software Engineering. It allows users to track recurring expenses, visualize monthly spending, and manage subscription cycles in one centralized dashboard.
 
 ---
 
