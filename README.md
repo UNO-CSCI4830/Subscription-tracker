@@ -51,7 +51,7 @@ Comprehensive project documentation is maintained in the [GitHub Wiki](https://g
 * **Nicholas Tran** – Architect & Development
 * **Jared Forsberg** – Architect & Development
 * **Maggie Slusher** – Tech Support & Development
-* **Violet Moore** – QA & Testing
+* **Violet Moore** – Quality Assurance & Testing
 
 ---
 
