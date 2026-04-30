@@ -30,10 +30,13 @@ SubTracked is a secure web application built for CSCI 4830: Intro to Software En
 ---
 
 ## Repository Structure
-* `/src`: Core application logic and styles.
-* `/tests`: Jest unit test suites for Auth, CRUD, and Logic modules.
-* `/docs`: Project artifacts including the SRS and Installation guide.
+* `/css`: Styles.
+* `/images`: Logo / assets.
+* `/js`: application logic.
 * `index.html`: Main application entry point.
+* `login_screen.html`
+* `create_account.html`
+* `settings.html`
 
 ---
 
