@@ -125,7 +125,8 @@
 <body>
   <div class="wrap">
     <img src="subtracked_logo_small.PNG" alt="Logo" style="float: left; margin-right: 10px; width: 50px; height: 50px; border-radius: 5px;">
-    <h1>SubTracked</h1>
+    <h1 style="display:inline-block; margin-right: 10px;">SubTracked</h1>
+    <button id="logoutBtn" class="small" style="vertical-align: middle;">Log Out</button>
     <div class="subtxt">
       
     </div>
@@ -238,59 +239,52 @@
   </div>
 
 <script>
-  const STORAGE_KEY = "subs_tracker_simple_v1";
+  const _supabaseUrl = 'https://lnvmocbxmdfkaxrxmpqn.supabase.co';
+  const _supabaseKey = 'sb_publishable_gVZEpmVuhZBt-V8NSaibYw_zaQPsmOb';
+  const supabaseClient = supabase.createClient(_supabaseUrl, _supabaseKey);
+
   let subs = [];
   let editId = null;
+  let currentUser = null;
 
   const $ = (id) => document.getElementById(id);
 
-  const formEl = $("form");
-  const nameInput = $("nameInput");
-  const siteInput = $("siteInput");
-  const priceInput = $("priceInput");
-  const cycleInput = $("cycleInput");
-  const dateInput = $("dateInput");
-  const catInput = $("catInput");
-  const notesInput = $("notesInput");
-  const addBtn = $("addBtn");
-  const resetBtn = $("resetBtn");
+  // UI Elements
+  const formEl = $("form"), nameInput = $("nameInput"), siteInput = $("siteInput");
+  const priceInput = $("priceInput"), cycleInput = $("cycleInput"), dateInput = $("dateInput");
+  const catInput = $("catInput"), notesInput = $("notesInput"), addBtn = $("addBtn");
+  const searchInput = $("searchInput"), sortInput = $("sortInput"), filterInput = $("filterInput");
+  const listEl = $("list"), monthlyTotal = $("monthlyTotal"), countText = $("countText");
+  const nextWhen = $("nextWhen"), nextWhat = $("nextWhat"), logoutBtn = $("logoutBtn");
+  const tabs = $("tabs"), addPanel = $("addPanel"), listPanel = $("listPanel");
 
-  const searchInput = $("searchInput");
-  const sortInput = $("sortInput");
-  const filterInput = $("filterInput");
-  const listEl = $("list");
+  // --- AUTH & LOADING ---
 
-  const monthlyTotal = $("monthlyTotal");
-  const countText = $("countText");
-  const nextWhen = $("nextWhen");
-  const nextWhat = $("nextWhat");
-
-  const tabs = $("tabs");
-  const addPanel = $("addPanel");
-  const listPanel = $("listPanel");
-
-  function todayISO(){
-    return new Date().toISOString().slice(0,10);
+  async function checkUser() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      window.location.href = "login_screen.html";
+    } else {
+      currentUser = user;
+      fetchSubs(); 
+    }
   }
 
-  // IMPORTANT: only set default if the input is empty (so it doesn't fight you)
-  if (!dateInput.value) dateInput.value = todayISO();
+  async function fetchSubs() {
+    const { data, error } = await supabaseClient
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('renewal', { ascending: true });
 
-  function load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      subs = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(subs)) subs = [];
-    } catch (e) { subs = []; }
+    if (error) console.error(error);
+    else {
+      subs = data;
+      render();
+    }
   }
 
-  function save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(subs)); } catch (e) {}
-  }
-
-  function newId() {
-    return Math.random().toString(16).slice(2) + Date.now().toString(16);
-  }
+  // --- LOGIC HELPERS ---
 
   function parseDate(iso) {
     const p = (iso || "").split("-").map(Number);
@@ -311,13 +305,8 @@
     return "good";
   }
 
-  function money(n) {
-    return Number(n || 0).toLocaleString(undefined, { style: "currency", currency: "USD" });
-  }
-
-  function pretty(d) {
-    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-  }
+  function money(n) { return Number(n || 0).toLocaleString(undefined, { style: "currency", currency: "USD" }); }
+  function pretty(d) { return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); }
 
   function monthlyEstimate(price, cycle) {
     price = Number(price || 0);
@@ -328,240 +317,98 @@
 
   function favicon(site) {
     if (!site) return "";
-    let host = site.trim().replace(/^https?:\/\//i, "");
-    host = host.replace(/\/.*$/, "");
-    if (!host) return "";
+    let host = site.trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "");
     return "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(host) + "&sz=64";
   }
+
+  // --- UI RENDERING ---
 
   function updateSummary() {
     const total = subs.reduce((sum, s) => sum + monthlyEstimate(s.price, s.cycle), 0);
     monthlyTotal.textContent = money(total);
     countText.textContent = subs.length + " subscription" + (subs.length === 1 ? "" : "s");
-
-    if (!subs.length) {
-      nextWhen.textContent = "—";
-      nextWhat.textContent = "—";
-      return;
-    }
-
+    if (!subs.length) { nextWhen.textContent = "—"; nextWhat.textContent = "—"; return; }
     const soonest = [...subs].sort((a, b) => parseDate(a.renewal) - parseDate(b.renewal))[0];
     const d = parseDate(soonest.renewal);
     const left = daysLeft(soonest.renewal);
-
     nextWhen.textContent = pretty(d);
-    nextWhat.textContent = soonest.name + " • " + left + " day" + (left === 1 ? "" : "s") + " left";
-  }
-
-  function getView() {
-    const q = (searchInput.value || "").trim().toLowerCase();
-
-    let view = subs.filter(s => {
-      const hay = (s.name + " " + (s.category || "") + " " + (s.site || "")).toLowerCase();
-      if (q && !hay.includes(q)) return false;
-
-      const d = daysLeft(s.renewal);
-      const b = bucketColor(d);
-
-      if (filterInput.value === "soon" && b !== "soon") return false;
-      if (filterInput.value === "mid" && b !== "mid") return false;
-      if (filterInput.value === "long" && b !== "good") return false;
-
-      return true;
-    });
-
-    view.sort((a, b) => {
-      const aDue = parseDate(a.renewal).getTime();
-      const bDue = parseDate(b.renewal).getTime();
-
-      switch (sortInput.value) {
-        case "soonest": return aDue - bDue;
-        case "latest":  return bDue - aDue;
-        case "hi":      return Number(b.price) - Number(a.price);
-        case "lo":      return Number(a.price) - Number(b.price);
-        case "az":      return a.name.localeCompare(b.name);
-        case "za":      return b.name.localeCompare(a.name);
-      }
-      return 0;
-    });
-
-    return view;
+    nextWhat.textContent = soonest.name + " • " + left + " days left";
   }
 
   function render() {
     updateSummary();
-    const view = getView();
+    let view = subs.filter(s => {
+      const q = (searchInput.value || "").toLowerCase();
+      if (q && !s.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
 
-    if (!view.length) {
-      listEl.innerHTML = `<div class="empty">Nothing here yet. Add one on the left (or hit demo).</div>`;
-      return;
-    }
-
-    listEl.innerHTML = "";
-
+    listEl.innerHTML = view.length ? "" : `<div class="empty">No subscriptions found.</div>`;
+    
     view.forEach(s => {
-      const left = daysLeft(s.renewal);
-      const b = bucketColor(left);
-      const d = parseDate(s.renewal);
-
-      const logo = s.site
-        ? `<img src="${favicon(s.site)}" alt="" onerror="this.style.display='none'">`
-        : "•";
-
+      const left = daysLeft(s.renewal), b = bucketColor(left), d = parseDate(s.renewal);
       const div = document.createElement("div");
       div.className = "item " + b;
-
       div.innerHTML = `
         <div class="bar"></div>
         <div class="left">
-          <div class="logo" title="${s.site || "No site"}">${logo}</div>
-          <div style="min-width:0">
+          <div class="logo"><img src="${favicon(s.site)}" onerror="this.style.display='none'"></div>
+          <div>
             <div class="name">${s.name}</div>
             <div class="meta">
-              <span class="tag">${s.category || "Other"}</span>
-              <span class="tag">${s.cycle}</span>
-              <span class="tag">Due: ${pretty(d)}</span>
-              <span class="tag">${left}d</span>
+              <span class="tag">${s.category}</span><span class="tag">Due: ${pretty(d)}</span>
             </div>
-            ${s.notes ? `<div class="note">${s.notes}</div>` : ""}
           </div>
         </div>
         <div class="right">
           <div class="price">${money(s.price)}</div>
-          <div>
-            <button class="small" data-action="edit" data-id="${s.id}">Edit</button>
-            <button class="small danger" data-action="del" data-id="${s.id}">Delete</button>
-          </div>
-        </div>
-      `;
-
+          <button class="small" data-action="edit" data-id="${s.id}">Edit</button>
+          <button class="small danger" data-action="del" data-id="${s.id}">Delete</button>
+        </div>`;
       listEl.appendChild(div);
     });
   }
 
-  function setTab(which) {
-    const mobile = window.matchMedia("(max-width:880px)").matches;
-    if (!mobile) return;
+  // --- EVENT LISTENERS ---
 
-    tabs.querySelectorAll(".tab").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.tab === which);
-    });
-
-    if (which === "add") {
-      addPanel.classList.remove("hide");
-      listPanel.classList.add("hide");
-    } else {
-      listPanel.classList.remove("hide");
-      addPanel.classList.add("hide");
-    }
-  }
-
-  formEl.addEventListener("submit", (e) => {
+  formEl.addEventListener("submit", async (e) => {
     e.preventDefault();
-
-    const name = nameInput.value.trim();
-    const site = siteInput.value.trim();
-    const price = priceInput.value;
-    const cycle = cycleInput.value;
-    const renewal = dateInput.value;
-    const category = catInput.value;
-    const notes = notesInput.value.trim();
-
-    if (!name || !renewal || price === "") {
-      alert("Fill out name, price, and renewal date.");
-      return;
-    }
-
     const obj = {
-      id: editId || newId(),
-      name, site,
-      price: Number(price),
-      cycle, renewal,
-      category, notes
+      name: nameInput.value, site: siteInput.value, price: Number(priceInput.value),
+      cycle: cycleInput.value, renewal: dateInput.value, category: catInput.value,
+      notes: notesInput.value, user_id: currentUser.id
     };
 
     if (editId) {
-      const idx = subs.findIndex(x => x.id === editId);
-      if (idx !== -1) subs[idx] = obj;
-      editId = null;
-      addBtn.textContent = "Add";
+      await supabaseClient.from('subscriptions').update(obj).eq('id', editId);
+      editId = null; addBtn.textContent = "Add";
     } else {
-      subs.push(obj);
+      await supabaseClient.from('subscriptions').insert([obj]);
     }
-
-    save();
-    render();
-
+    fetchSubs();
     formEl.reset();
-    dateInput.value = todayISO();   // set a default AFTER reset, but you can still change it
-    setTab("list");
   });
 
-  resetBtn.addEventListener("click", () => {
-    editId = null;
-    addBtn.textContent = "Add";
-    formEl.reset();
-    dateInput.value = todayISO();
-  });
-
-  listEl.addEventListener("click", (e) => {
+  listEl.addEventListener("click", async (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
-
-    const id = btn.dataset.id;
-    const action = btn.dataset.action;
-
-    const hit = subs.find(x => x.id === id);
-    if (!hit) return;
-
-    if (action === "del") {
-      if (confirm("Delete " + hit.name + "?")) {
-        subs = subs.filter(x => x.id !== id);
-        save();
-        render();
-      }
-    }
-
-    if (action === "edit") {
-      editId = id;
-      nameInput.value = hit.name;
-      siteInput.value = hit.site || "";
-      priceInput.value = hit.price;
-      cycleInput.value = hit.cycle;
-      dateInput.value = hit.renewal;
-      catInput.value = hit.category || "Other";
-      notesInput.value = hit.notes || "";
+    const id = btn.dataset.id, action = btn.dataset.action;
+    if (action === "del" && confirm("Delete?")) {
+      await supabaseClient.from('subscriptions').delete().eq('id', id);
+      fetchSubs();
+    } else if (action === "edit") {
+      const hit = subs.find(x => x.id == id);
+      editId = id; nameInput.value = hit.name; priceInput.value = hit.price;
       addBtn.textContent = "Save";
-      setTab("add");
-      nameInput.focus();
     }
   });
 
-  [searchInput, sortInput, filterInput].forEach(el => {
-    el.addEventListener("input", render);
-    el.addEventListener("change", render);
+  logoutBtn.addEventListener("click", async () => {
+    await supabaseClient.auth.signOut();
+    window.location.href = "login_screen.html";
   });
 
-  tabs.addEventListener("click", (e) => {
-    const b = e.target.closest(".tab");
-    if (!b) return;
-    setTab(b.dataset.tab);
-  });
-
-  window.addEventListener("resize", () => {
-    const mobile = window.matchMedia("(max-width:880px)").matches;
-    if (!mobile) {
-      addPanel.classList.remove("hide");
-      listPanel.classList.remove("hide");
-    } else {
-      const active = tabs.querySelector(".tab.active")?.dataset.tab || "add";
-      setTab(active);
-    }
-  });
-
-  load();
-  render();
-  setTab("add");
+  checkUser(); // Kick off the process
 </script>
 
 </body>
